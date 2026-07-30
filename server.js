@@ -7,8 +7,8 @@ const session = require("express-session");
 const productRoutes = require("./routes/products");
 const userRoutes = require("./routes/users");
 const cartRoutes = require("./routes/cart");
-const orderRoutes = require("./routes/orders"); // Importa o roteador de pedidos
-const reviewRoutes = require("./routes/reviews"); // Importa o roteador de avaliações
+const orderRoutes = require("./routes/orders");
+const reviewRoutes = require("./routes/reviews");
 
 // Importa o middleware de logger
 const loggerMiddleware = require("./middlewares/loggerMiddleware");
@@ -16,16 +16,15 @@ const loggerMiddleware = require("./middlewares/loggerMiddleware");
 // Cria a aplicação Express
 const app = express();
 
-// Middlewares globais
-app.use(express.json()); // Permite que a aplicação receba dados em formato JSON
-app.use(cookieParser()); // Para parsear cookies
+app.use(express.json()); 
+app.use(cookieParser()); 
 app.use(session({
-    secret: 'seu_segredo_secreto', // Use uma string mais segura em produção
+    secret: 'seu_segredo_secreto', 
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Defina como true em produção com HTTPS
+    cookie: { secure: false } 
 }));
-app.use(loggerMiddleware); // Usa o middleware de logging personalizado
+app.use(loggerMiddleware); 
 
 // Rota inicial para verificar se o servidor está funcionando
 app.get("/", (req, res) => {
@@ -36,16 +35,16 @@ app.get("/", (req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes); // Usa o roteador de pedidos para /api/orders
-app.use("/api/reviews", reviewRoutes); // Usa o roteador de avaliações para /api/reviews
+app.use("/api/orders", orderRoutes);
+app.use("/api/reviews", reviewRoutes);
 
-// Middleware de erro global
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Algo deu errado no servidor!');
 });
 
-// Inicia o servidor na porta 3000
+
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000");
 });
