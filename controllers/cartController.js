@@ -1,6 +1,6 @@
 const { carts, products } = require("../utils/mockData");
 
-// Função auxiliar para encontrar o carrinho de um usuário
+// pega o carrinho do usuário, cria se ainda não existir
 const findOrCreateCart = (userId) => {
     let userCart = carts.find(cart => cart.userId === userId);
     if (!userCart) {
@@ -10,7 +10,6 @@ const findOrCreateCart = (userId) => {
     return userCart;
 };
 
-// Adicionar item ao carrinho
 exports.addItemToCart = (req, res) => {
     const { productId, quantity } = req.body;
     const userId = req.session.userId;
@@ -27,6 +26,10 @@ exports.addItemToCart = (req, res) => {
     const existingItem = userCart.items.find(item => item.productId === parseInt(productId));
 
     if (existingItem) {
+        // se já tem o item, só soma a quantidade (sem estourar o estoque)
+        if (existingItem.quantity + quantity > product.estoque) {
+            return res.status(400).json({ message: "Quantidade em estoque insuficiente." });
+        }
         existingItem.quantity += quantity;
     } else {
         userCart.items.push({ productId: parseInt(productId), quantity });
@@ -35,7 +38,6 @@ exports.addItemToCart = (req, res) => {
     res.status(200).json({ message: "Item adicionado ao carrinho com sucesso!", cart: userCart });
 };
 
-// Remover item do carrinho
 exports.removeItemFromCart = (req, res) => {
     const { productId } = req.params;
     const userId = req.session.userId;
@@ -51,7 +53,6 @@ exports.removeItemFromCart = (req, res) => {
     res.status(200).json({ message: "Item removido do carrinho com sucesso!", cart: userCart });
 };
 
-// Atualizar quantidade de um item no carrinho
 exports.updateCartItemQuantity = (req, res) => {
     const { productId } = req.params;
     const { quantity } = req.body;
@@ -76,12 +77,11 @@ exports.updateCartItemQuantity = (req, res) => {
     res.status(200).json({ message: "Quantidade do item atualizada com sucesso!", cart: userCart });
 };
 
-// Visualizar carrinho atual
 exports.viewCart = (req, res) => {
     const userId = req.session.userId;
     const userCart = findOrCreateCart(userId);
 
-    // Adiciona detalhes do produto aos itens do carrinho
+    // manda junto os dados completos de cada produto
     const detailedCartItems = userCart.items.map(item => {
         const product = products.find(p => p.id === item.productId);
         return { ...item, productDetails: product };

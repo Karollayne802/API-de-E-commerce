@@ -6,12 +6,10 @@ const requireAuth = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Todas as rotas de carrinho requerem autenticação
 router.use(requireAuth);
 
-// Adicionar item ao carrinho
 router.post(
-    "/",
+    "/items",
     [
         body("productId").isInt({ gt: 0 }).withMessage("ID do produto inválido."),
         body("quantity").isInt({ gt: 0 }).withMessage("A quantidade deve ser um número positivo."),
@@ -20,12 +18,10 @@ router.post(
     cartController.addItemToCart
 );
 
-// Remover item do carrinho
-router.delete("/:productId", cartController.removeItemFromCart);
+router.delete("/items/:productId", cartController.removeItemFromCart);
 
-// Atualizar quantidade de um item no carrinho
 router.put(
-    "/:productId",
+    "/items/:productId",
     [
         body("quantity").isInt({ gt: 0 }).withMessage("A quantidade deve ser um número positivo."),
     ],
@@ -33,7 +29,6 @@ router.put(
     cartController.updateCartItemQuantity
 );
 
-// Visualizar carrinho atual
 router.get("/", cartController.viewCart);
 
 module.exports = router;

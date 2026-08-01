@@ -1,4 +1,3 @@
-// routes/products.js
 const express = require("express");
 const { body } = require("express-validator");
 const productController = require("../controllers/productController");
@@ -8,13 +7,11 @@ const requireAdmin = require("../middlewares/adminMiddleware");
 
 const router = express.Router();
 
-// Rota para listar produtos com filtros
+// listagem e detalhe são públicos
 router.get("/", productController.listProducts);
-
-// Rota para buscar produto por ID
 router.get("/:id", productController.getProductById);
 
-// Rota para criar um novo produto (requer autenticação e admin)
+// só admin
 router.post(
     "/",
     requireAuth,
@@ -30,7 +27,6 @@ router.post(
     productController.createProduct
 );
 
-// Rota para editar um produto existente (requer autenticação e admin)
 router.put(
     "/:id",
     requireAuth,
@@ -46,7 +42,6 @@ router.put(
     productController.updateProduct
 );
 
-// Rota para remover um produto (requer autenticação e admin)
 router.delete("/:id", requireAuth, requireAdmin, productController.deleteProduct);
 
 module.exports = router;

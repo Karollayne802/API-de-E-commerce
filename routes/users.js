@@ -6,7 +6,7 @@ const requireAuth = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Rota de registro de usuário
+// cadastro
 router.post(
     "/register",
     [
@@ -19,16 +19,12 @@ router.post(
     userController.registerUser
 );
 
-// Rota de login de usuário
+// login 
 router.post("/login", userController.loginUser);
-
-// Rota de logout de usuário (requer autenticação)
 router.post("/logout", requireAuth, userController.logoutUser);
 
-// Rota para obter o perfil do usuário (requer autenticação)
+// perfil 
 router.get("/profile", requireAuth, userController.getUserProfile);
-
-// Rota para atualizar o perfil do usuário (requer autenticação)
 router.put(
     "/profile",
     requireAuth,

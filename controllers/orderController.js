@@ -1,6 +1,6 @@
 const { orders, carts, products } = require("../utils/mockData");
 
-// Função para finalizar compra (converter carrinho em pedido)
+// vira o carrinho em um pedido e limpa o carrinho
 exports.checkout = (req, res) => {
     const userId = req.session.userId;
     const userCartIndex = carts.findIndex(cart => cart.userId === userId);
@@ -23,7 +23,7 @@ exports.checkout = (req, res) => {
         }
         total += product.preco * item.quantity;
         orderItems.push({ productId: item.productId, quantity: item.quantity, price: product.preco });
-        product.estoque -= item.quantity; // Reduz o estoque
+        product.estoque -= item.quantity; // baixa no estoque
     }
 
     const newOrder = {
@@ -36,13 +36,11 @@ exports.checkout = (req, res) => {
     };
     orders.push(newOrder);
 
-    // Limpa o carrinho após a compra
-    carts[userCartIndex].items = [];
+    carts[userCartIndex].items = []; // esvazia o carrinho
 
     res.status(201).json({ message: "Compra finalizada com sucesso!", order: newOrder });
 };
 
-// listar histórico de pedidos do usuário
 exports.listUserOrders = (req, res) => {
     const userId = req.session.userId;
     const userOrders = orders.filter(order => order.userId === userId);
@@ -50,11 +48,11 @@ exports.listUserOrders = (req, res) => {
     res.status(200).json(userOrders);
 };
 
-// visualiza detalhes de um pedido específico
 exports.getOrderDetails = (req, res) => {
     const { id } = req.params;
     const userId = req.session.userId;
 
+    // só deixa ver se o pedido for do próprio usuário
     const order = orders.find(o => o.id === parseInt(id) && o.userId === userId);
 
     if (!order) {

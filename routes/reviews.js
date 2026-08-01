@@ -6,12 +6,11 @@ const requireAuth = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-// Rota para adicionar uma avaliação (requer autenticação)
+// criar avaliação 
 router.post(
-    "/",
+    "/:productId/reviews",
     requireAuth,
     [
-        body("productId").isInt({ gt: 0 }).withMessage("ID do produto inválido."),
         body("nota").isInt({ min: 1, max: 5 }).withMessage("A nota deve ser entre 1 e 5."),
         body("comentario").optional().isLength({ max: 500 }).withMessage("O comentário não pode exceder 500 caracteres."),
     ],
@@ -19,7 +18,6 @@ router.post(
     reviewController.addReview
 );
 
-// Rota para listar avaliações de um produto
-router.get("/:productId", reviewController.listProductReviews);
+router.get("/:productId/reviews", reviewController.listProductReviews);
 
 module.exports = router;

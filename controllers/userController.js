@@ -1,35 +1,32 @@
 const { users } = require("../utils/mockData");
-const bcrypt = require("bcryptjs"); 
+const bcrypt = require("bcryptjs");
 
-// registra um novo usuário
+// cadastro de novo usuário
 exports.registerUser = async (req, res) => {
     const { nome, email, senha, endereco } = req.body;
 
-    // Verifica se o e-mail já existe
     if (users.find(user => user.email === email)) {
         return res.status(400).json({ message: "E-mail já cadastrado." });
     }
 
-    // Hash da senha
     const hashedPassword = await bcrypt.hash(senha, 10);
 
-    // Cria o novo usuário
     const newUser = {
         id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
         nome,
         email,
         senhaHash: hashedPassword,
         endereco,
-        isAdmin: false, 
+        isAdmin: false,
     };
     users.push(newUser);
 
-    // Retorna o usuário sem a senha hash
+    // tira o hash da resposta
     const { senhaHash, ...userWithoutPassword } = newUser;
     res.status(201).json({ message: "Usuário registrado com sucesso!", user: userWithoutPassword });
 };
 
-// Função para login de usuário
+// login: salva o userId na sessão
 exports.loginUser = async (req, res) => {
     const { email, senha } = req.body;
 
@@ -38,32 +35,27 @@ exports.loginUser = async (req, res) => {
         return res.status(400).json({ message: "Credenciais inválidas." });
     }
 
-    // Compara a senha fornecida com a senha hash
     const isMatch = await bcrypt.compare(senha, user.senhaHash);
     if (!isMatch) {
         return res.status(400).json({ message: "Credenciais inválidas." });
     }
 
-    // Armazena o ID do usuário na sessão
     req.session.userId = user.id;
 
-    // Retorna o usuário sem a senha hash
     const { senhaHash, ...userWithoutPassword } = user;
     res.status(200).json({ message: "Login realizado com sucesso!", user: userWithoutPassword });
 };
 
-// Função para logout de usuário
 exports.logoutUser = (req, res) => {
     req.session.destroy(err => {
         if (err) {
             return res.status(500).json({ message: "Erro ao fazer logout." });
         }
-        res.clearCookie("connect.sid"); 
+        res.clearCookie("connect.sid");
         res.status(200).json({ message: "Logout realizado com sucesso!" });
     });
 };
 
-// Função para obter o perfil do usuário
 exports.getUserProfile = (req, res) => {
     const user = users.find(u => u.id === req.session.userId);
     if (!user) {
@@ -73,7 +65,7 @@ exports.getUserProfile = (req, res) => {
     res.status(200).json({ user: userWithoutPassword });
 };
 
-// atualiza o perfil do usuário
+// só atualiza os campos que vieram
 exports.updateUserProfile = (req, res) => {
     const { nome, email, endereco } = req.body;
     const userIndex = users.findIndex(u => u.id === req.session.userId);
@@ -82,7 +74,6 @@ exports.updateUserProfile = (req, res) => {
         return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
-    // Atualiza os dados do usuário
     users[userIndex].nome = nome || users[userIndex].nome;
     users[userIndex].email = email || users[userIndex].email;
     users[userIndex].endereco = endereco || users[userIndex].endereco;
